@@ -2,7 +2,7 @@ from soundfile import SoundFile
 import numpy as np
 
 def loadTracks(inInstrumentos):
-    print("AGREGANDO SONIDOS...")
+    print("Agregando stems...")
     tracks = []
     for track in inInstrumentos:
         if track == "kick":
@@ -47,3 +47,9 @@ def loadTracks(inInstrumentos):
             print(track + " agregado")
 
     return tracks
+
+'''textfile = open('mixes/dato' + str(answer) + str(cont) + '.txt', "w")
+for elem in tracksModified[cont][1]:
+    textfile.write(str(elem[0]) + ', ' + str(elem[1]) + '\n')
+    #print("elem:", elem)
+textfile.close()'''

@@ -14,7 +14,7 @@ clingo_args = [ "--warn=none",
                 "--enum-mode=record"]
 
 # **** NUMERO DE MEZCLAS POR HACER ***** #
-numMixes = 10
+numMixes = 2
 
 # **** CONFIGURAR Y CARGAR CLINGO ***** #
 control = clingo.Control(clingo_args)
@@ -23,7 +23,8 @@ control.load("mixer.lp")
 models = []
 
 # **** INSTRUMENTOS A MEZCLAR ***** #
-instrumentos = ["kick", "guitOne", "guitTwo", "tomOne"]
+# DISPONIBLES: kick, snare, hihat, tomOne, tomTwo, tomThree, over, bass, guitOne, guitTwo, piano, vox
+instrumentos = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass"]
 
 # *** CARGAR AUDIOS **** #
 loadedTracks = loadTracks.loadTracks(instrumentos)
@@ -57,30 +58,29 @@ for model in models:
 
         instrumento = str(atom.arguments[0])
         pan = int(str(atom.arguments[1]))
-        # vol = int(str(atom.arguments[2]))
+        vol = int(str(atom.arguments[2]))
 
         resul = []
         resul.append(instrumento)
         resul.append(pan)
-        # resul.append(vol)
+        resul.append(vol)
 
         resp.append(resul)
 
-        print("APLICAR", pan, "de paneo a", instrumento)
-        # print("Aplicar", pan, "de paneo a", instrumento, "con un volumen de", vol)
+        #print("APLICAR", pan, "de paneo a", instrumento)
+        print("Aplicar", pan, "de paneo a", instrumento, "con un volumen de", vol)
 
     resultados.append(resp)
     cont += 1
-
-print("------")
 
 # ORDERNAR RESULTADOS Y AUDIOS #
 resultados = sorted(resultados)
 loadedTracks = sorted(loadedTracks)
 
 # HACER OPERACIONES DE PANEO #
+print("---------")
+print("Mixing...")
 tracksFinales = []
-
 for answer in range(numMixes):
 
     if (answer+1) <= len(resultados):
@@ -95,11 +95,12 @@ for answer in range(numMixes):
             right_factor = math.sin(3.141592 * (factor + 1) / 4)
 
             # VOLUMEN
-            #vol = track[2]
+            vol = track[2]
+            vol = vol / 10
 
             # OPERACIONES CON TRACKS
-            tracksModified[cont][1][:, 0] *= left_factor
-            tracksModified[cont][1][:, 1] *= right_factor
+            tracksModified[cont][1][:, 0] *= left_factor * vol
+            tracksModified[cont][1][:, 1] *= right_factor * vol
 
             # SUMAR TRACKS
             trackFinal += tracksModified[cont][1]
@@ -107,13 +108,7 @@ for answer in range(numMixes):
             cont += 1
 
         sf.write('mixes/mix_' + str(answer+1) + '.wav', trackFinal, 44100, 'PCM_24')
+        print("Mezcla", answer+1, "creada")
     else:
         print("Ya no hay más mezclas disponibles")
-
-
-
-'''textfile = open('mixes/dato' + str(answer) + str(cont) + '.txt', "w")
-for elem in tracksModified[cont][1]:
-    textfile.write(str(elem[0]) + ', ' + str(elem[1]) + '\n')
-    #print("elem:", elem)
-textfile.close()'''
+        break
