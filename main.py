@@ -4,6 +4,8 @@ import math
 import loadTracks
 import copy
 import soundfile as sf
+from pysndfx import AudioEffectsChain
+import numpy as np
 
 clingo_args = [ "--warn=none",
                 "--sign-def=rnd",
@@ -14,7 +16,7 @@ clingo_args = [ "--warn=none",
                 "--enum-mode=record"]
 
 # **** NUMERO DE MEZCLAS POR HACER ***** #
-numMixes = 10
+numMixes = 2
 
 # **** CONFIGURAR Y CARGAR CLINGO ***** #
 control = clingo.Control(clingo_args)
@@ -23,7 +25,9 @@ control.load("mixer.lp")
 models = []
 
 # **** INSTRUMENTOS A MEZCLAR ***** #
-instrumentosOri = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitOne", "guitTwo", "piano", "vox"]
+instrumentosOri = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitOne", "guitTwo",
+                   "piano", "vox"]
+
 # *** CARGAR AUDIOS **** #
 loadedTracks = loadTracks.loadTracks(instrumentosOri)
 print("------")
@@ -76,19 +80,21 @@ for model in models:
     resultados.append(resp)
     cont += 1
 
-# ORDERNAR RESULTADOS Y AUDIOS #
+# *** ORDENAR RESULTADOS Y AUDIOS **** #
+loadedTracks = sorted(loadedTracks)
 resultadosPre = sorted(resultados)
 resultados = []
 for result in resultadosPre:
     resultados.append(sorted(result))
-loadedTracks = sorted(loadedTracks)
 
-# HACER OPERACIONES A SAMPLES #
+# *** EFECTOS *** #
+reverb = AudioEffectsChain().reverb(reverberance=100)
+
+# *** MIXING *** #
 print("---------")
 print("Mixing...")
-tracksFinales = []
 for answer in range(numMixes):
-
+    # ******** CHECAR SI HAY O NO MÁS ANSWERS DE LAS REQUERIDAS ******** #
     if (answer+1) <= len(resultados):
         tracksModified = copy.deepcopy(loadedTracks)
         trackFinal = 0
@@ -96,33 +102,61 @@ for answer in range(numMixes):
 
         for track in resultados[answer]:
 
+            # ****** CHECAR QUE PISTA SE VA A MODIFICAR ****** #
             numeroPista = 0
             for numPista in range(len(tracksModified)):
-
                 if track[0] == tracksModified[numPista][0]:
                     numeroPista = numPista
                     break
 
-            # PANEO
+            # ********************* PANEO ****************** #
             factor = track[1] / 10
             left_factor = math.cos(3.141592 * (factor + 1) / 4)
             right_factor = math.sin(3.141592 * (factor + 1) / 4)
 
-            # VOLUMEN
+            # ******************** VOLUMEN ****************** #
             vol = track[2]
             vol = vol / 10
 
-            # OPERACIONES CON TRACKS
+            # ********************* REVERB ****************** #
+            withReverb = copy.deepcopy(tracksModified[numeroPista][1])
+            left = []
+            right = []
+
+            for sample in withReverb:
+                left.append(sample[0])
+                right.append(sample[1])
+
+            forEffect = []
+            forEffect.append(left)
+            forEffect.append(right)
+            arr = np.array(forEffect)
+            reverbAudio = reverb(arr)
+            stereoSamples = []
+            for sample in reverbAudio[0]:
+                stereoSample = [sample, sample]
+                stereoSamples.append(stereoSample)
+
+            reverbSound = np.append([[0.0, 0.0]], stereoSamples, axis=0)
+            reverbSound = np.delete(reverbSound, 0, 0)
+
+            # ***************** OPERACIONES CON TRACKS **************** #
             tracksModified[numeroPista][1][:, 0] *= left_factor * vol
             tracksModified[numeroPista][1][:, 1] *= right_factor * vol
 
-            # SUMAR TRACKS
+            # *********************** SUMAR TRACKS ******************** #
             trackFinal += tracksModified[numeroPista][1]
+            #trackFinal += tracksModified[numeroPista][1] + (reverbSound * 0.2)
 
             cont += 1
 
+        # ************************** RENDER MIX **************************** #
         sf.write('mixes/mix_' + str(answer+1) + '.wav', trackFinal, 44100, 'PCM_24')
         print("Mezcla", answer+1, "creada")
     else:
         print("Ya no hay más mezclas disponibles")
         break
+
+# *** END *** #
+print("-------")
+print("¡Ya puedes escuchar tus mezclas!")
