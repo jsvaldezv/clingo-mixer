@@ -24,7 +24,7 @@ models = []
 
 # **** INSTRUMENTOS A MEZCLAR ***** #
 # DISPONIBLES: kick, snare, hihat, tomOne, tomTwo, tomThree, over, bass, guitOne, guitTwo, piano, vox
-instrumentos = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass"]
+instrumentos = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitOne", "guitTwo", "piano", "vox"]
 
 # *** CARGAR AUDIOS **** #
 loadedTracks = loadTracks.loadTracks(instrumentos)
@@ -74,7 +74,10 @@ for model in models:
     cont += 1
 
 # ORDERNAR RESULTADOS Y AUDIOS #
-resultados = sorted(resultados)
+resultadosPre = sorted(resultados)
+resultados = []
+for result in resultadosPre:
+    resultados.append(sorted(result))
 loadedTracks = sorted(loadedTracks)
 
 # HACER OPERACIONES DE PANEO #
