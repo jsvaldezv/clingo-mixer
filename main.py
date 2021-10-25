@@ -33,7 +33,7 @@ loadedTracks = loadTracks.loadTracks(instrumentosOri)
 print("------")
 
 # DISPONIBLES: kick, snare, hihat, tomOne, tomTwo, tomThree, over, bass, guitOne, guitTwo, piano, vox
-## SE PUDE MODIFICAR
+## SE PUEDE MODIFICAR
 instrumentosClingo = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitOne", "guitTwo", "piano", "vox"]
 
 # **** AÑADIR HECHOS A LP ***** #

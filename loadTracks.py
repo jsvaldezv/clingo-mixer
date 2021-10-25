@@ -48,6 +48,11 @@ def loadTracks(inInstrumentos):
 
     return tracks
 
+def loadTrackswithPath(inPaths):
+    for path in inPaths:
+        print(path)
+    print("AUDIOS CARGADOS")
+
 '''textfile = open('mixes/dato' + str(answer) + str(cont) + '.txt', "w")
 for elem in tracksModified[cont][1]:
     textfile.write(str(elem[0]) + ', ' + str(elem[1]) + '\n')
