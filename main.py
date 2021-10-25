@@ -16,7 +16,7 @@ clingo_args = [ "--warn=none",
                 "--enum-mode=record"]
 
 # **** NUMERO DE MEZCLAS POR HACER ***** #
-numMixes = 2
+numMixes = 3
 
 # **** CONFIGURAR Y CARGAR CLINGO ***** #
 control = clingo.Control(clingo_args)
@@ -34,8 +34,7 @@ print("------")
 
 # DISPONIBLES: kick, snare, hihat, tomOne, tomTwo, tomThree, over, bass, guitOne, guitTwo, piano, vox
 ## SE PUDE MODIFICAR
-instrumentosClingo = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitOne",
-                      "guitTwo", "piano", "vox"]
+instrumentosClingo = ["kick", "snare", "hihat", "over", "vox", "guitOne"]
 
 # **** AÑADIR HECHOS A LP ***** #
 for instrumento in instrumentosClingo:
@@ -61,8 +60,6 @@ for model in models:
     resp = []
     print("MIX ", cont+1)
     for atom in model:
-        #print(atom)
-
         instrumento = str(atom.arguments[0])
         pan = int(str(atom.arguments[1]))
         vol = int(str(atom.arguments[2]))
@@ -74,7 +71,6 @@ for model in models:
 
         resp.append(resul)
 
-        #print("APLICAR", pan, "de paneo a", instrumento)
         print("Aplicar", pan, "de paneo a", instrumento, "con un volumen de", vol)
 
     resultados.append(resp)
@@ -88,7 +84,7 @@ for result in resultadosPre:
     resultados.append(sorted(result))
 
 # *** EFECTOS *** #
-reverb = AudioEffectsChain().reverb(reverberance=100)
+# reverb = AudioEffectsChain().reverb(reverberance=100)
 
 # *** MIXING *** #
 print("---------")
@@ -105,7 +101,10 @@ for answer in range(numMixes):
             # ****** CHECAR QUE PISTA SE VA A MODIFICAR ****** #
             numeroPista = 0
             for numPista in range(len(tracksModified)):
-                if track[0] == tracksModified[numPista][0]:
+
+                nombre = track[0]
+
+                if nombre == tracksModified[numPista][0]:
                     numeroPista = numPista
                     break
 
@@ -119,7 +118,7 @@ for answer in range(numMixes):
             vol = vol / 10
 
             # ********************* REVERB ****************** #
-            withReverb = copy.deepcopy(tracksModified[numeroPista][1])
+            '''withReverb = copy.deepcopy(tracksModified[numeroPista][1])
             left = []
             right = []
 
@@ -138,7 +137,7 @@ for answer in range(numMixes):
                 stereoSamples.append(stereoSample)
 
             reverbSound = np.append([[0.0, 0.0]], stereoSamples, axis=0)
-            reverbSound = np.delete(reverbSound, 0, 0)
+            reverbSound = np.delete(reverbSound, 0, 0)'''
 
             # ***************** OPERACIONES CON TRACKS **************** #
             tracksModified[numeroPista][1][:, 0] *= left_factor * vol

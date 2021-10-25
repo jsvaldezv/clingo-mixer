@@ -19,15 +19,16 @@ withPan(snare, 0) :- instrument(snare).
 withPan(bass, 0) :- instrument(bass).
 withPan(vox, 0) :- instrument(vox).
 withPan(over, 0) :- instrument(over).
+withPan(piano, 0) :- instrument(piano).
 
 %% TOMS %%
-1 { panOne(-5) ; panOne(5) ; panOne(1) } 1 :- instrument(tomOne).
+1 { panOne(-5) ; panOne(5) ; panOne(8) } 1 :- instrument(tomOne).
  withPan(tomOne, P)  :- panOne(P).
 
-1 { panTwo(-5) ; panTwo(5) ; panTwo(1) } 1 :- instrument(tomTwo).
+1 { panTwo(-5) ; panTwo(5) ; panTwo(-8) } 1 :- instrument(tomTwo).
  withPan(tomTwo, P)  :- panTwo(P).
 
-1 { panThree(-5) ; panThree(5) ; panThree(1) } 1 :- instrument(tomThree).
+1 { panThree(-5) ; panThree(5) ; panThree(8) } 1 :- instrument(tomThree).
  withPan(tomThree, P)  :- panThree(P).
 
 :- withPan(tomOne, P), withPan(tomThree, P).
@@ -39,7 +40,8 @@ bothGuitar(no) :- not instrument(guitOne), instrument(guitTwo).
 bothGuitar(no) :- instrument(guitOne), not instrument(guitTwo).
 bothGuitar(yes) :- instrument(guitOne), instrument(guitTwo).
 
-withPan(guit, 0) :- bothGuitar(no).
+1 { guit(guitOne) ; guit(guitTwo) } 1 :- bothGuitar(no).
+withPan(G, 0) :- guit(G).
 
 1 { panGuitOne(-10) ; panGuitOne(10) } 1 :- bothGuitar(yes).
  withPan(guitOne, P) :- panGuitOne(P).
@@ -50,15 +52,15 @@ withPan(guit, 0) :- bothGuitar(no).
 :- withPan(guitOne, P), withPan(guitTwo, P).
 
 %% HI HAT %%
-1 { panHihat(-5) ; panHihat(5) ; panHihat(0) } 1 :- instrument(hihat).
- withPan(hihat, P)  :- panHihat(P).
+1 { panHihat(-5) ; panHihat(5) ; panHihat(-3) } 1 :- instrument(hihat).
+withPan(hihat, P)  :- panHihat(P).
 
 %% PIANO %%
-1 { choosePiano(mono) ; choosePiano(stereo) } 1 :- instrument(piano).
-withPan(piano, 0) :- choosePiano(mono).
-pan(-10) :- choosePiano(stereo).
-pan(10) :- choosePiano(stereo).
-withPan(piano, P)  :- pan(P).
+%1 { choosePiano(mono) ; choosePiano(stereo) } 1 :- instrument(piano).
+%withPan(piano, 0) :- choosePiano(mono).
+%pan(-10) :- choosePiano(stereo).
+%pan(10) :- choosePiano(stereo).
+%withPan(piano, P)  :- pan(P).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  BALANCE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% KICK
@@ -72,32 +74,33 @@ volSnare(5..7).
 withVol(snare, V) : volSnare(V) :-  instrument(snare).
 
 % HIHAT
-volHihat(4..5).
+volHihat(4;7).
 withVol(hihat, V) : volHihat(V) :-  instrument(hihat).
 
 %% TOMS %%
-volToms(3..5).
+volToms(3;7;5).
 withVol(tomOne, V) : volToms(V) :-  instrument(tomOne).
 withVol(tomTwo, V) : volToms(V) :-  instrument(tomTwo).
 withVol(tomThree, V) : volToms(V)  :-  instrument(tomThree).
 
 % OVER
-volOver(2..4).
+volOver(2;5).
 withVol(over, V) : volOver(V) :- instrument(over).
 
 % BASS
-volBass(2..4).
+volBass(2;5).
 withVol(bass, V) : volBass(V) :- instrument(bass).
 
 %% GUITARRAS
-withVol(guit, 8) :-  bothGuitar(no).
+1 { guit(guitOne) ; guit(guitTwo) } 1 :- bothGuitar(no).
+withVol(G, 8) :- guit(G).
 
-volGuit(5..6).
+volGuit(4;7).
 withVol(guitOne, V) : volGuit(V) :- bothGuitar(yes).
 withVol(guitTwo, V) : volGuit(V) :- bothGuitar(yes).
 
 % PIANO
-volPiano(3..5).
+volPiano(3;5).
 withVol(piano, V) : volPiano(V) :- instrument(piano).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  MIX  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
