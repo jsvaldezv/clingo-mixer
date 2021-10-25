@@ -14,7 +14,7 @@ clingo_args = [ "--warn=none",
                 "--enum-mode=record"]
 
 # **** NUMERO DE MEZCLAS POR HACER ***** #
-numMixes = 2
+numMixes = 10
 
 # **** CONFIGURAR Y CARGAR CLINGO ***** #
 control = clingo.Control(clingo_args)
@@ -23,15 +23,18 @@ control.load("mixer.lp")
 models = []
 
 # **** INSTRUMENTOS A MEZCLAR ***** #
-# DISPONIBLES: kick, snare, hihat, tomOne, tomTwo, tomThree, over, bass, guitOne, guitTwo, piano, vox
-instrumentos = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitOne", "guitTwo", "piano", "vox"]
-
+instrumentosOri = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitOne", "guitTwo", "piano", "vox"]
 # *** CARGAR AUDIOS **** #
-loadedTracks = loadTracks.loadTracks(instrumentos)
+loadedTracks = loadTracks.loadTracks(instrumentosOri)
 print("------")
 
+# DISPONIBLES: kick, snare, hihat, tomOne, tomTwo, tomThree, over, bass, guitOne, guitTwo, piano, vox
+## SE PUDE MODIFICAR
+instrumentosClingo = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitOne",
+                      "guitTwo", "piano", "vox"]
+
 # **** AÑADIR HECHOS A LP ***** #
-for instrumento in instrumentos:
+for instrumento in instrumentosClingo:
     fact = "track(" + instrumento + ", on)."
     control.add("base", [], str(fact))
 
@@ -80,7 +83,7 @@ for result in resultadosPre:
     resultados.append(sorted(result))
 loadedTracks = sorted(loadedTracks)
 
-# HACER OPERACIONES DE PANEO #
+# HACER OPERACIONES A SAMPLES #
 print("---------")
 print("Mixing...")
 tracksFinales = []
@@ -92,6 +95,14 @@ for answer in range(numMixes):
         cont = 0
 
         for track in resultados[answer]:
+
+            numeroPista = 0
+            for numPista in range(len(tracksModified)):
+
+                if track[0] == tracksModified[numPista][0]:
+                    numeroPista = numPista
+                    break
+
             # PANEO
             factor = track[1] / 10
             left_factor = math.cos(3.141592 * (factor + 1) / 4)
@@ -102,11 +113,11 @@ for answer in range(numMixes):
             vol = vol / 10
 
             # OPERACIONES CON TRACKS
-            tracksModified[cont][1][:, 0] *= left_factor * vol
-            tracksModified[cont][1][:, 1] *= right_factor * vol
+            tracksModified[numeroPista][1][:, 0] *= left_factor * vol
+            tracksModified[numeroPista][1][:, 1] *= right_factor * vol
 
             # SUMAR TRACKS
-            trackFinal += tracksModified[cont][1]
+            trackFinal += tracksModified[numeroPista][1]
 
             cont += 1
 
