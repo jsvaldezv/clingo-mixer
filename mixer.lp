@@ -55,13 +55,6 @@ withPan(G, 0) :- guit(G).
 1 { panHihat(-5) ; panHihat(5) ; panHihat(-3) } 1 :- instrument(hihat).
 withPan(hihat, P)  :- panHihat(P).
 
-%% PIANO %%
-%1 { choosePiano(mono) ; choosePiano(stereo) } 1 :- instrument(piano).
-%withPan(piano, 0) :- choosePiano(mono).
-%pan(-10) :- choosePiano(stereo).
-%pan(10) :- choosePiano(stereo).
-%withPan(piano, P)  :- pan(P).
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  BALANCE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% KICK
 withVol(kick, 9) :- instrument(kick).
@@ -103,9 +96,68 @@ withVol(guitTwo, V) : volGuit(V) :- bothGuitar(yes).
 volPiano(3;5).
 withVol(piano, V) : volPiano(V) :- instrument(piano).
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    EFFECTS    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%     effect(instrument, reverb).
+%%%     effect(instrument, delay).
+%%%     effect(instrument, both).
+%%%     effect(instrument, off).
+
+%reverb(I) :- instrument(I, on).
+
+%% KICK
+revKick(0).
+withRev(kick, D) : revKick(D) :- instrument(kick).
+
+% VOX
+revVox(2;4).
+withRev(vox, D) : revVox(D) :- instrument(vox).
+
+% SNARE
+revSnare(3;5).
+withRev(snare, D) : revSnare(D) :- instrument(snare).
+
+% HIHAT
+revHihat(0).
+withRev(hihat, D) : revHihat(D) :- instrument(hihat).
+
+%% TOMS %%
+revtomOne(1;2).
+withRev(tomOne, D) : revtomOne(D) :- instrument(tomOne).
+revtomTwo(1;2).
+withRev(tomTwo, D) : revtomTwo(D) :- instrument(tomTwo).
+revtomThree(1;2).
+withRev(tomThree, D) : revtomThree(D) :- instrument(tomThree).
+
+% OVER
+revOver(2;3).
+withRev(over, D) : revOver(D) :- instrument(over).
+
+% BASS
+revbass(0).
+withRev(bass, D) : revbass(D) :- instrument(bass).
+
+%% GUITARRAS
+revguit(2;4).
+%withRev(guit, D) : revguit(D) :- instrument(guitOne), bothGuitar(no).
+1 { guit(guitOne) ; guit(guitTwo) } 1 :- bothGuitar(no).
+1 { withRev(G, R) : revguit(R)} 1:- guit(G).
+
+revguitOne(2;4).
+withRev(guitOne, D) : revguitOne(D) :- instrument(guitOne), bothGuitar(yes).
+
+revguitTwo(2;4).
+withRev(guitTwo, D) : revguitTwo(D) :- instrument(guitTwo), bothGuitar(yes).
+
+% PIANO
+revPiano(0).
+withRev(piano, D) : revPiano(D) :- instrument(piano).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  MIX  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-mix(I, P, V) :- withVol(I, V), withPan(I, P).
+mix(I, P, V, R) : withRev(I, R) :- withVol(I, V), withPan(I, P).
 
 %#show withVol/2.
 %#show withPan/2.
-#show mix/3.
+%#show withDelay/2.
+%#show withRev/2.
+#show mix/4.

@@ -34,7 +34,7 @@ print("------")
 
 # DISPONIBLES: kick, snare, hihat, tomOne, tomTwo, tomThree, over, bass, guitOne, guitTwo, piano, vox
 ## SE PUDE MODIFICAR
-instrumentosClingo = ["kick", "snare", "hihat", "over", "vox", "guitOne"]
+instrumentosClingo = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitOne", "guitTwo", "piano", "vox"]
 
 # **** AÑADIR HECHOS A LP ***** #
 for instrumento in instrumentosClingo:
@@ -63,15 +63,17 @@ for model in models:
         instrumento = str(atom.arguments[0])
         pan = int(str(atom.arguments[1]))
         vol = int(str(atom.arguments[2]))
+        rev = int(str(atom.arguments[3]))
 
         resul = []
         resul.append(instrumento)
         resul.append(pan)
         resul.append(vol)
+        resul.append(rev)
 
         resp.append(resul)
 
-        print("Aplicar", pan, "de paneo a", instrumento, "con un volumen de", vol)
+        print("Aplicar", pan, "de paneo a", instrumento, "con un volumen de", vol, "y reverb de", rev*10)
 
     resultados.append(resp)
     cont += 1
@@ -82,9 +84,6 @@ resultadosPre = sorted(resultados)
 resultados = []
 for result in resultadosPre:
     resultados.append(sorted(result))
-
-# *** EFECTOS *** #
-# reverb = AudioEffectsChain().reverb(reverberance=100)
 
 # *** MIXING *** #
 print("---------")
@@ -118,7 +117,10 @@ for answer in range(numMixes):
             vol = vol / 10
 
             # ********************* REVERB ****************** #
-            '''withReverb = copy.deepcopy(tracksModified[numeroPista][1])
+            rev = track[3] * 10
+            reverb = AudioEffectsChain().reverb(reverberance=rev)
+
+            withReverb = copy.deepcopy(tracksModified[numeroPista][1])
             left = []
             right = []
 
@@ -137,15 +139,15 @@ for answer in range(numMixes):
                 stereoSamples.append(stereoSample)
 
             reverbSound = np.append([[0.0, 0.0]], stereoSamples, axis=0)
-            reverbSound = np.delete(reverbSound, 0, 0)'''
+            reverbSound = np.delete(reverbSound, 0, 0)
 
             # ***************** OPERACIONES CON TRACKS **************** #
             tracksModified[numeroPista][1][:, 0] *= left_factor * vol
             tracksModified[numeroPista][1][:, 1] *= right_factor * vol
 
             # *********************** SUMAR TRACKS ******************** #
-            trackFinal += tracksModified[numeroPista][1]
-            #trackFinal += tracksModified[numeroPista][1] + (reverbSound * 0.2)
+            #trackFinal += tracksModified[numeroPista][1]
+            trackFinal += tracksModified[numeroPista][1] + reverbSound
 
             cont += 1
 
