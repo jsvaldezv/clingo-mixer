@@ -39,7 +39,11 @@ class ListboxWidget(QListWidget):
         else:
             event.ignore()
 
+instrumentosClingo = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitTwo",
+                          "guitOne", "piano", "vox"]
+
 class AppDemo(QMainWindow):
+
     def __init__(self):
         super().__init__()
         self.resize(1200, 600)
@@ -49,19 +53,14 @@ class AppDemo(QMainWindow):
         self.btn = QPushButton('Añadir instrumento', self)
         self.btn.setGeometry(850, 400, 200, 50)
 
-        instrumentosClingo = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitTwo",
-                              "guitOne", "piano", "vox"]
-
         self.btn.clicked.connect(lambda: print(self.getSelectedItem()))
 
-        def getSelectedItem(self):
-            #loadTracks.loadTracks(instrumentosClingo
-            item = QListWidgetItem(self.lstbox_view.currentItem())
-            return item.text()
+    def getSelectedItem(self):
+        loadTracks.loadTracks(instrumentosClingo)
+        item = QListWidgetItem(self.lstbox_view.currentItem())
+        return item.text()
 
 app = QApplication(sys.argv)
-
 demo = AppDemo()
 demo.show()
-
 sys.exit(app.exec_())
