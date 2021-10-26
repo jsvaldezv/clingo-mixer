@@ -1,5 +1,5 @@
 import sys, os
-from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QPushButton, QWidget, QLabel, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QPushButton, QWidget, QLabel, QVBoxLayout, QInputDialog
 import PyQt5.QtGui as qtg
 import PyQt5.QtWidgets as qtw
 from PyQt5.QtCore import Qt, QUrl
@@ -24,6 +24,7 @@ class Canvas(FigureCanvas):
 
         fig.savefig("test.png")
         plt.show()
+
 
 class ListboxWidget(QListWidget):
 
@@ -64,93 +65,51 @@ class ListboxWidget(QListWidget):
     def setPos(self, posX, posY):
         self.setGeometry(posX, posY, 200, 50)
 
+
 class AppDemo(QMainWindow, QWidget):
-    
+
     def __init__(self):
         super().__init__()
         self.resize(1200, 600)
         self.todos = []
+        self.tracksDefault = ["Kick", "Snare", "Hi Hat", "Tom 1", "Tom 2", "Tom 3", "Over", "Bass", "Piano", "Vox"]
 
-        audioTwoLabel = qtw.QLabel("Drums", self)
-        audioTwoLabel.setGeometry(210, 5, 40, 30)
+        self.initXBox = 240
+        self.initYBox = 15
+        self.initXLabel = 330
+        self.initYBoxLabel = 65
+        self.sizeTextX = 70
 
-        self.audioOne = ListboxWidget(self)
-        self.audioOne.setPos(10, 40)
-        audioOneLabel = qtw.QLabel("Kick", self)
-        audioOneLabel.setGeometry(95, 90, 30, 30)
-        self.todos.append(self.audioOne)
-
-        self.audioTwo = ListboxWidget(self)
-        self.audioTwo.setPos(10, 130)
-        audioTwoLabel = qtw.QLabel("Snare", self)
-        audioTwoLabel.setGeometry(95, 180, 40, 30)
-        self.todos.append(self.audioTwo)
-
-        self.audioTres = ListboxWidget(self)
-        self.audioTres.setPos(10, 230)
-        audioTresLabel = qtw.QLabel("HiHat", self)
-        audioTresLabel.setGeometry(95, 280, 40, 30)
-        self.todos.append(self.audioTres)
-
-        '''self.audioTwo = ListboxWidget(self)
-        self.audioTwo.setPos(10, 230)
-        audioTwoLabel = qtw.QLabel("HiHat", self)
-        audioTwoLabel.setGeometry(95, 280, 40, 30)
-
-        self.audioTwo = ListboxWidget(self)
-        self.audioTwo.setPos(10, 330)
-        audioTwoLabel = qtw.QLabel("Tom 1", self)
-        audioTwoLabel.setGeometry(95, 380, 40, 30)
-
-        self.audioTwo = ListboxWidget(self)
-        self.audioTwo.setPos(10, 430)
-        audioTwoLabel = qtw.QLabel("Tom 2", self)
-        audioTwoLabel.setGeometry(95, 480, 40, 30)
-
-        self.audioTwo = ListboxWidget(self)
-        self.audioTwo.setPos(10, 530)
-        audioTwoLabel = qtw.QLabel("Tom 3", self)
-        audioTwoLabel.setGeometry(95, 580, 40, 30)
-
-        self.audioTwo = ListboxWidget(self)
-        self.audioTwo.setPos(10, 630)
-        audioTwoLabel = qtw.QLabel("Over", self)
-        audioTwoLabel.setGeometry(95, 680, 40, 30)
-
-        self.audioTwo = ListboxWidget(self)
-        self.audioTwo.setPos(10, 710)
-        audioTwoLabel = qtw.QLabel("Cymbal", self)
-        audioTwoLabel.setGeometry(95, 760, 60, 40)'''
-
-        self.audioFour = ListboxWidget(self)
-        self.audioFour.setPos(250, 40)
-        audioFourLabel = qtw.QLabel("Shaker", self)
-        audioFourLabel.setGeometry(325, 90, 50, 30)
-        self.todos.append(self.audioFour)
-
-        self.audioFive = ListboxWidget(self)
-        self.audioFive.setPos(250, 130)
-        audioFiveLabel = qtw.QLabel("Clap", self)
-        audioFiveLabel.setGeometry(325, 180, 50, 30)
-        self.todos.append(self.audioFive)
-
-        self.audioSix = ListboxWidget(self)
-        self.audioSix.setPos(250, 230)
-        audioSixLabel = qtw.QLabel("Cymbal", self)
-        audioSixLabel.setGeometry(325, 280, 50, 30)
-        self.todos.append(self.audioSix)
-
+        # LOAD AUDIOS #
         self.btnMix = QPushButton('Mix', self)
-        self.btnMix.setGeometry(0, 500, 200, 50)
-        self.btnMix.clicked.connect(lambda: self.getSelectedItem())
+        self.btnMix.setGeometry(10, 10, 200, 50)
+        self.btnMix.clicked.connect(lambda: self.loadPathAudios())
 
-        # self.btnAdd = QPushButton('Añadir instrumento', self)
-        # self.btnAdd.setGeometry(500, 30, 200, 50)
-        # self.btnAdd.clicked.connect(lambda: self.createNewBox())
+        # CREATE NEW BOX #
+        self.btnAdd = QPushButton('Añadir instrumento', self)
+        self.btnAdd.setGeometry(10, 70, 200, 50)
+        self.btnAdd.clicked.connect(lambda: self.showModalWindow())
+
+        for track in self.tracksDefault:
+
+            self.checkDimensions()
+
+            globals()['string%s' % track] = ListboxWidget(self)
+            globals()['string%s' % track].setPos(self.initXBox, self.initYBox)
+            globals()['string%s' % track + 'label'] = qtw.QLabel(track, self)
+            globals()['string%s' % track + 'label'].setGeometry(self.initXLabel, self.initYBoxLabel, self.sizeTextX, 30)
+            self.todos.append(globals()['string%s' % track])
+
+            self.initYBox += 80
+            self.initYBoxLabel += 80
+
+        # TITLE
+        # audioTwoLabel = qtw.QLabel("Drums", self)
+        # audioTwoLabel.setGeometry(210, 5, 40, 30)
 
         #chart = Canvas(self)
 
-    def getSelectedItem(self):
+    def loadPathAudios(self):
         paths = []
         for item in self.todos:
             path = QListWidgetItem(item.item(0))
@@ -158,10 +117,48 @@ class AppDemo(QMainWindow, QWidget):
                 paths.append(path.text())
         loadTracks.loadTrackswithPath(paths)
 
-    def createNewBox(self):
-        self.newBox = ListboxWidget()
-        self.newBox.setPos(10, 630)
-        print("CREATE NEW BOX")
+    def showModalWindow(self):
+        text, ok = QInputDialog.getText(self, 'Añadir Instrumento', 'Escribe el nombre de tu instrumento:')
+        if ok:
+            self.createNewBox(text)
+
+    def checkDimensions(self):
+
+        if self.initYBox >= 575 and self.initXBox == 240:
+            self.initYBox = 15
+            self.initYBoxLabel = 65
+            self.initXBox = 470
+            self.initXLabel = 550
+
+        if self.initYBox >= 575 and self.initXBox == 470:
+            self.initYBox = 15
+            self.initYBoxLabel = 65
+            self.initXBox = 700
+            self.initXLabel = 780
+
+        if self.initYBox >= 575 and self.initXBox == 700:
+            self.initYBox = 15
+            self.initYBoxLabel = 65
+            self.initXBox = 920
+            self.initXLabel = 1020
+
+    def createNewBox(self, inName):
+
+        self.checkDimensions()
+
+        globals()['string%s' % inName] = ListboxWidget(self)
+        globals()['string%s' % inName].setPos(self.initXBox, self.initYBox)
+        globals()['string%s' % inName].show()
+        self.todos.append(globals()['string%s' % inName])
+
+        globals()['string%s' % inName + 'label'] = qtw.QLabel(inName, self)
+        globals()['string%s' % inName + 'label'].setGeometry(self.initXLabel, self.initYBoxLabel, self.sizeTextX, 30)
+        globals()['string%s' % inName + 'label'].show()
+
+        self.initYBox += 80
+        self.initYBoxLabel += 80
+
+        print(inName, "añadido")
 
 app = QApplication(sys.argv)
 demo = AppDemo()
