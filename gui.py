@@ -2,11 +2,8 @@ import sys, os
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QPushButton, QWidget, QLabel, QVBoxLayout, QInputDialog
 import PyQt5.QtWidgets as qtw
 from PyQt5.QtCore import Qt, QUrl
-import loadTracks
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-
 import clingo
 import random
 import math
@@ -23,7 +20,7 @@ clingo_args = [ "--warn=none",
                 "--seed=%s"%random.randint(0,32767),
                 "--restart-on-model",
                 "--enum-mode=record"]
-numMixes = 3
+numMixes = 2
 
 class Canvas(FigureCanvas):
     def __init__(self, parent):
@@ -108,6 +105,11 @@ class Main(QMainWindow, QWidget):
         self.btnAdd.setGeometry(10, 70, 200, 50)
         self.btnAdd.clicked.connect(lambda: self.showModalWindow())
 
+        # CREATE NEW BOX #
+        self.btnAdd = QPushButton('Limpiar', self)
+        self.btnAdd.setGeometry(10, 130, 200, 50)
+        self.btnAdd.clicked.connect(lambda: self.clear())
+
         for track in self.tracks:
 
             self.checkDimensions()
@@ -121,13 +123,11 @@ class Main(QMainWindow, QWidget):
             self.initYBox += 80
             self.initYBoxLabel += 80
 
-        # **** CONFIGURAR Y CARGAR CLINGO ***** #
-        self.control = clingo.Control(clingo_args)
-        self.control.configuration.solve.models = numMixes
-        self.control.load("mixer.lp")
-        models = []
-
         #chart = Canvas(self)
+
+    def clear(self):
+        for track in self.tracks:
+            globals()['string%s' % track].clear()
 
     def loadPathAudios(self):
         infoFinal = []
@@ -145,26 +145,32 @@ class Main(QMainWindow, QWidget):
         self.solveWithClingo()
 
     def solveWithClingo(self):
+        # **** CONFIGURAR Y CARGAR CLINGO ***** #
+        control = clingo.Control(clingo_args)
+        control.configuration.solve.models = numMixes
+        control.load("mixer.lp")
+        models = []
+
         # **** AÑADIR HECHOS A LP ***** #
         for instrumento in self.loadedTracks:
             fact = "track(" + instrumento[0] + ", on)."
-            self.control.add("base", [], str(fact))
+            control.add("base", [], str(fact))
 
         # **** GROUNDING ***** #
         print("Grounding...")
-        self.control.ground([("base", [])])
+        control.ground([("base", [])])
         print("------")
 
         # **** SOLVE ***** #
         print("Solving...")
-        with self.control.solve(yield_=True) as solve_handle:
+        with control.solve(yield_=True) as solve_handle:
             for model in solve_handle:
-                self.models.append(model.symbols(shown=True))
+                models.append(model.symbols(shown=True))
         print("------")
 
         cont = 0
         resultados = []
-        for model in self.models:
+        for model in models:
             resp = []
             print("MIX ", cont + 1)
             for atom in model:
@@ -313,6 +319,7 @@ class Main(QMainWindow, QWidget):
         self.initYBoxLabel += 80
 
         print(inName, "añadido")
+
 
 app = QApplication(sys.argv)
 demo = Main()
