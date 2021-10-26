@@ -1,14 +1,11 @@
 import sys, os
-from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QPushButton, QWidget, QLabel, QVBoxLayout, QInputDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QPushButton, QWidget
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QInputDialog, QSpinBox
 import PyQt5.QtWidgets as qtw
 from PyQt5.QtCore import Qt, QUrl
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-import clingo
-import random
-import math
-import loadTracks
-import copy
+import clingo, random, math, loadTracks, copy
 import soundfile as sf
 from pysndfx import AudioEffectsChain
 import numpy as np
@@ -20,7 +17,6 @@ clingo_args = [ "--warn=none",
                 "--seed=%s"%random.randint(0,32767),
                 "--restart-on-model",
                 "--enum-mode=record"]
-numMixes = 2
 
 class Canvas(FigureCanvas):
     def __init__(self, parent):
@@ -100,15 +96,24 @@ class Main(QMainWindow, QWidget):
         self.btnMix.setGeometry(10, 10, 200, 50)
         self.btnMix.clicked.connect(lambda: self.loadPathAudios())
 
-        # CREATE NEW BOX #
+        # AÑADIR #
         self.btnAdd = QPushButton('Añadir instrumento', self)
         self.btnAdd.setGeometry(10, 70, 200, 50)
         self.btnAdd.clicked.connect(lambda: self.showModalWindow())
 
-        # CREATE NEW BOX #
+        # LIMPIAR #
         self.btnAdd = QPushButton('Limpiar', self)
         self.btnAdd.setGeometry(10, 130, 200, 50)
         self.btnAdd.clicked.connect(lambda: self.clear())
+
+        self.numMixes = QLabel(self)
+        self.numMixes.setText("Numero de mezclas")
+        self.numMixes.setGeometry(15, 200, 190, 30)
+
+        self.sp = QSpinBox(self)
+        self.sp.setGeometry(15, 230, 190, 30)
+        self.sp.setValue(1)
+        self.sp.show()
 
         for track in self.tracks:
 
@@ -148,7 +153,8 @@ class Main(QMainWindow, QWidget):
     def solveWithClingo(self):
         # **** CONFIGURAR Y CARGAR CLINGO ***** #
         control = clingo.Control(clingo_args)
-        control.configuration.solve.models = numMixes
+        print(self.sp.value())
+        control.configuration.solve.models = self.sp.value()
         control.load("mixer.lp")
         models = []
 
@@ -203,7 +209,7 @@ class Main(QMainWindow, QWidget):
         # *** MIXING *** #
         print("---------")
         print("Mixing...")
-        for answer in range(numMixes):
+        for answer in range(self.sp.value()):
             # ******** CHECAR SI HAY O NO MÁS ANSWERS DE LAS REQUERIDAS ******** #
             if (answer + 1) <= len(resultados):
                 tracksModified = copy.deepcopy(self.loadedTracks)

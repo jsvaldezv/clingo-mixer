@@ -59,7 +59,6 @@ def checkStems(inPaths):
 
 def loadTrackswithPath(inPaths, inLen):
     print("Agregando stems...")
-    print(inLen)
     tracks = []
     for path in inPaths:
         #print(path)
