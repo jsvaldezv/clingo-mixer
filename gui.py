@@ -1,6 +1,5 @@
 import sys, os
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QPushButton, QWidget, QLabel, QVBoxLayout, QInputDialog
-import PyQt5.QtGui as qtg
 import PyQt5.QtWidgets as qtw
 from PyQt5.QtCore import Qt, QUrl
 import loadTracks
@@ -66,13 +65,13 @@ class ListboxWidget(QListWidget):
         self.setGeometry(posX, posY, 200, 50)
 
 
-class AppDemo(QMainWindow, QWidget):
+class Main(QMainWindow, QWidget):
 
     def __init__(self):
         super().__init__()
         self.resize(1200, 600)
-        self.todos = []
-        self.tracksDefault = ["Kick", "Snare", "Hi Hat", "Tom 1", "Tom 2", "Tom 3", "Over", "Bass", "Piano", "Vox"]
+        self.todosWidgets = []
+        self.tracks = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "piano", "vox"]
 
         self.initXBox = 240
         self.initYBox = 15
@@ -90,7 +89,7 @@ class AppDemo(QMainWindow, QWidget):
         self.btnAdd.setGeometry(10, 70, 200, 50)
         self.btnAdd.clicked.connect(lambda: self.showModalWindow())
 
-        for track in self.tracksDefault:
+        for track in self.tracks:
 
             self.checkDimensions()
 
@@ -98,7 +97,10 @@ class AppDemo(QMainWindow, QWidget):
             globals()['string%s' % track].setPos(self.initXBox, self.initYBox)
             globals()['string%s' % track + 'label'] = qtw.QLabel(track, self)
             globals()['string%s' % track + 'label'].setGeometry(self.initXLabel, self.initYBoxLabel, self.sizeTextX, 30)
-            self.todos.append(globals()['string%s' % track])
+            self.todosWidgets.append(globals()['string%s' % track])
+
+            #trackWithName = [track, globals()['string%s' % track]]
+            #self.todos.append(trackWithName)
 
             self.initYBox += 80
             self.initYBoxLabel += 80
@@ -110,12 +112,19 @@ class AppDemo(QMainWindow, QWidget):
         #chart = Canvas(self)
 
     def loadPathAudios(self):
-        paths = []
-        for item in self.todos:
+        infoFinal = []
+        cont = 0
+        for item in self.todosWidgets:
             path = QListWidgetItem(item.item(0))
             if path.text():
-                paths.append(path.text())
-        loadTracks.loadTrackswithPath(paths)
+                path = path.text()
+                pista = self.tracks[cont]
+                infoFinal.append([pista, path])
+
+            cont += 1
+
+        loadedTracks = loadTracks.loadTrackswithPath(infoFinal)
+        print(loadedTracks)
 
     def showModalWindow(self):
         text, ok = QInputDialog.getText(self, 'Añadir Instrumento', 'Escribe el nombre de tu instrumento:')
@@ -149,7 +158,10 @@ class AppDemo(QMainWindow, QWidget):
         globals()['string%s' % inName] = ListboxWidget(self)
         globals()['string%s' % inName].setPos(self.initXBox, self.initYBox)
         globals()['string%s' % inName].show()
-        self.todos.append(globals()['string%s' % inName])
+
+        trackWithName = [inName, globals()['string%s' % inName]]
+        self.todos.append(trackWithName)
+        #self.todos.append(globals()['string%s' % inName])
 
         globals()['string%s' % inName + 'label'] = qtw.QLabel(inName, self)
         globals()['string%s' % inName + 'label'].setGeometry(self.initXLabel, self.initYBoxLabel, self.sizeTextX, 30)
@@ -161,6 +173,6 @@ class AppDemo(QMainWindow, QWidget):
         print(inName, "añadido")
 
 app = QApplication(sys.argv)
-demo = AppDemo()
+demo = Main()
 demo.show()
 sys.exit(app.exec_())
