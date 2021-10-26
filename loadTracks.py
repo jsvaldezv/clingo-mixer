@@ -48,20 +48,37 @@ def loadTracks(inInstrumentos):
 
     return tracks
 
-def loadTrackswithPath(inPaths):
+def checkStems(inPaths):
+    print("Checking stems...")
+    mayor = 0
+    for path in inPaths:
+        file = SoundFile(path[1])
+        if len(file) > mayor:
+            mayor = len(file)
+    return mayor
+
+def loadTrackswithPath(inPaths, inLen):
     print("Agregando stems...")
+    print(inLen)
     tracks = []
     for path in inPaths:
-        print(path)
-
+        #print(path)
         track = path[0]
         file = SoundFile(path[1])
 
         if file.channels == 1:
             stereoSamples = []
             samples = file.read()
-            for sample in samples:
-                stereoSample = [sample, sample]
+            #for sample in samples:
+                #stereoSample = [sample, sample]
+                #stereoSamples.append(stereoSample)
+
+            for i in range(inLen):
+                if i >= len(samples):
+                    stereoSample = [0.0, 0.0]
+                else:
+                    stereoSample = [samples[i], samples[i]]
+
                 stereoSamples.append(stereoSample)
 
             stereoSound = np.append([[0.0, 0.0]], stereoSamples, axis=0)
@@ -70,10 +87,24 @@ def loadTrackswithPath(inPaths):
             print(track + " agregado")
 
         else:
-            tracks.append([track, file.read()])
+            stereoSamples = []
+            samples = file.read()
+            for i in range(inLen):
+                if i >= len(samples):
+                    stereoSample = [0.0, 0.0]
+                else:
+                    stereoSample = [samples[i][0], samples[i][1]]
+
+                stereoSamples.append(stereoSample)
+
+            stereoSound = np.append([[0.0, 0.0]], stereoSamples, axis=0)
+            stereoSound = np.delete(stereoSound, 0, 0)
+            tracks.append([track, stereoSound])
+
+            #tracks.append([track, file.read()])
             print(track + " agregado")
 
-    print("AUDIOS CARGADOS")
+    print("----------")
     return tracks
 
 '''textfile = open('mixes/dato' + str(answer) + str(cont) + '.txt', "w")
