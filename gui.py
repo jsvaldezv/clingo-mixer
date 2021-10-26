@@ -7,6 +7,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
+import clingo
+import random
+import math
+import loadTracks
+import copy
+import soundfile as sf
+from pysndfx import AudioEffectsChain
+import numpy as np
+
+clingo_args = [ "--warn=none",
+                "--sign-def=rnd",
+                "--sign-fix",
+                "--rand-freq=1",
+                "--seed=%s"%random.randint(0,32767),
+                "--restart-on-model",
+                "--enum-mode=record"]
+numMixes = 3
+
 class Canvas(FigureCanvas):
     def __init__(self, parent):
         fig, self.ax = plt.subplots(figsize=(5, 4), dpi = 200)
@@ -71,6 +89,7 @@ class Main(QMainWindow, QWidget):
         super().__init__()
         self.resize(1200, 600)
         self.todosWidgets = []
+        self.models = []
         self.tracks = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "piano", "vox"]
 
         self.initXBox = 240
@@ -99,15 +118,14 @@ class Main(QMainWindow, QWidget):
             globals()['string%s' % track + 'label'].setGeometry(self.initXLabel, self.initYBoxLabel, self.sizeTextX, 30)
             self.todosWidgets.append(globals()['string%s' % track])
 
-            #trackWithName = [track, globals()['string%s' % track]]
-            #self.todos.append(trackWithName)
-
             self.initYBox += 80
             self.initYBoxLabel += 80
 
-        # TITLE
-        # audioTwoLabel = qtw.QLabel("Drums", self)
-        # audioTwoLabel.setGeometry(210, 5, 40, 30)
+        # **** CONFIGURAR Y CARGAR CLINGO ***** #
+        self.control = clingo.Control(clingo_args)
+        self.control.configuration.solve.models = numMixes
+        self.control.load("mixer.lp")
+        models = []
 
         #chart = Canvas(self)
 
@@ -123,8 +141,134 @@ class Main(QMainWindow, QWidget):
 
             cont += 1
 
-        loadedTracks = loadTracks.loadTrackswithPath(infoFinal)
-        print(loadedTracks)
+        self.loadedTracks = loadTracks.loadTrackswithPath(infoFinal)
+        self.solveWithClingo()
+
+    def solveWithClingo(self):
+        # **** AÑADIR HECHOS A LP ***** #
+        for instrumento in self.loadedTracks:
+            fact = "track(" + instrumento[0] + ", on)."
+            self.control.add("base", [], str(fact))
+
+        # **** GROUNDING ***** #
+        print("Grounding...")
+        self.control.ground([("base", [])])
+        print("------")
+
+        # **** SOLVE ***** #
+        print("Solving...")
+        with self.control.solve(yield_=True) as solve_handle:
+            for model in solve_handle:
+                self.models.append(model.symbols(shown=True))
+        print("------")
+
+        cont = 0
+        resultados = []
+        for model in self.models:
+            resp = []
+            print("MIX ", cont + 1)
+            for atom in model:
+                instrumento = str(atom.arguments[0])
+                pan = int(str(atom.arguments[1]))
+                vol = int(str(atom.arguments[2]))
+                rev = int(str(atom.arguments[3]))
+
+                resul = []
+                resul.append(instrumento)
+                resul.append(pan)
+                resul.append(vol)
+                resul.append(rev)
+
+                resp.append(resul)
+
+                print("Aplicar", pan, "de paneo a", instrumento, "con un volumen de", vol, "y reverb de", rev * 10)
+
+            resultados.append(resp)
+            cont += 1
+
+        # *** ORDENAR RESULTADOS Y AUDIOS **** #
+        self.loadedTracks = sorted(self.loadedTracks)
+        self.resultadosPre = sorted(resultados)
+        resultados = []
+        for result in self.resultadosPre:
+            resultados.append(sorted(result))
+
+        # *** MIXING *** #
+        print("---------")
+        print("Mixing...")
+        for answer in range(numMixes):
+            # ******** CHECAR SI HAY O NO MÁS ANSWERS DE LAS REQUERIDAS ******** #
+            if (answer + 1) <= len(resultados):
+                tracksModified = copy.deepcopy(self.loadedTracks)
+                trackFinal = 0
+                cont = 0
+
+                for track in resultados[answer]:
+
+                    # ****** CHECAR QUE PISTA SE VA A MODIFICAR ****** #
+                    numeroPista = 0
+                    for numPista in range(len(tracksModified)):
+
+                        nombre = track[0]
+
+                        if nombre == tracksModified[numPista][0]:
+                            numeroPista = numPista
+                            break
+
+                    # ********************* PANEO ****************** #
+                    factor = track[1] / 10
+                    left_factor = math.cos(3.141592 * (factor + 1) / 4)
+                    right_factor = math.sin(3.141592 * (factor + 1) / 4)
+
+                    # ******************** VOLUMEN ****************** #
+                    vol = track[2]
+                    vol = vol / 10
+
+                    # ********************* REVERB ****************** #
+                    rev = track[3] * 10
+                    reverb = AudioEffectsChain().reverb(reverberance=rev)
+
+                    withReverb = copy.deepcopy(tracksModified[numeroPista][1])
+                    left = []
+                    right = []
+
+                    for sample in withReverb:
+                        left.append(sample[0])
+                        right.append(sample[1])
+
+                    forEffect = []
+                    forEffect.append(left)
+                    forEffect.append(right)
+                    arr = np.array(forEffect)
+                    reverbAudio = reverb(arr)
+                    stereoSamples = []
+                    for sample in reverbAudio[0]:
+                        stereoSample = [sample, sample]
+                        stereoSamples.append(stereoSample)
+
+                    reverbSound = np.append([[0.0, 0.0]], stereoSamples, axis=0)
+                    reverbSound = np.delete(reverbSound, 0, 0)
+
+                    # ***************** OPERACIONES CON TRACKS **************** #
+                    tracksModified[numeroPista][1][:, 0] *= left_factor * vol
+                    tracksModified[numeroPista][1][:, 1] *= right_factor * vol
+
+                    # *********************** SUMAR TRACKS ******************** #
+                    # trackFinal += tracksModified[numeroPista][1]
+                    trackFinal += tracksModified[numeroPista][1] + reverbSound
+
+                    cont += 1
+
+                # ************************** RENDER MIX **************************** #
+                sf.write('mixes/mix_' + str(answer + 1) + '.wav', trackFinal, 44100, 'PCM_24')
+                print("Mezcla", answer + 1, "creada")
+            else:
+                print("Ya no hay más mezclas disponibles")
+                break
+
+        # *** END *** #
+        print("-------")
+        print("¡Ya puedes escuchar tus mezclas!")
 
     def showModalWindow(self):
         text, ok = QInputDialog.getText(self, 'Añadir Instrumento', 'Escribe el nombre de tu instrumento:')
@@ -158,14 +302,12 @@ class Main(QMainWindow, QWidget):
         globals()['string%s' % inName] = ListboxWidget(self)
         globals()['string%s' % inName].setPos(self.initXBox, self.initYBox)
         globals()['string%s' % inName].show()
-
-        trackWithName = [inName, globals()['string%s' % inName]]
-        self.todos.append(trackWithName)
-        #self.todos.append(globals()['string%s' % inName])
+        self.todosWidgets.append(globals()['string%s' % inName])
 
         globals()['string%s' % inName + 'label'] = qtw.QLabel(inName, self)
         globals()['string%s' % inName + 'label'].setGeometry(self.initXLabel, self.initYBoxLabel, self.sizeTextX, 30)
         globals()['string%s' % inName + 'label'].show()
+        self.tracks.append(inName)
 
         self.initYBox += 80
         self.initYBoxLabel += 80
