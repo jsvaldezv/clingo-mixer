@@ -1,6 +1,6 @@
-import sys, os
+import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QPushButton, QWidget
-from PyQt5.QtWidgets import QLabel, QVBoxLayout, QInputDialog, QSpinBox
+from PyQt5.QtWidgets import QLabel, QVBoxLayout, QInputDialog, QSpinBox, QMessageBox
 import PyQt5.QtWidgets as qtw
 from PyQt5.QtCore import Qt, QUrl
 import matplotlib.pyplot as plt
@@ -17,6 +17,7 @@ clingo_args = [ "--warn=none",
                 "--seed=%s"%random.randint(0,32767),
                 "--restart-on-model",
                 "--enum-mode=record"]
+
 
 class Canvas(FigureCanvas):
     def __init__(self, parent):
@@ -83,6 +84,9 @@ class Main(QMainWindow, QWidget):
         self.resize(1200, 600)
         self.todosWidgets = []
         self.models = []
+        self.validNames = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitOne",
+                           "guitTwo", "piano", "vox", "clap", "cymbal", "shaker", "acouguit", "synth", "strings",
+                           "arp", "drums"]
         self.tracks = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "piano", "vox"]
 
         self.initXBox = 240
@@ -115,16 +119,31 @@ class Main(QMainWindow, QWidget):
         self.sp.setValue(1)
         self.sp.show()
 
+        self.label = QLabel(self)
+        self.label.setText("Instrumentos validos:")
+        self.label.setGeometry(15, 260, 190, 30)
+        self.label.show()
+
+        self.inicioX = 15
+        self.inicioY = 285
+
+        for name in self.validNames:
+            globals()['string%s' % name] = QLabel(self)
+            globals()['string%s' % name].setText(name)
+            globals()['string%s' % name].setGeometry(self.inicioX,  self.inicioY, 190, 30)
+            self.inicioY += 20
+
+            if self.inicioY >= 575:
+                self.inicioY = 285
+                self.inicioX = 100
+
         for track in self.tracks:
-
             self.checkDimensions()
-
             globals()['string%s' % track] = ListboxWidget(self)
             globals()['string%s' % track].setPos(self.initXBox, self.initYBox)
             globals()['string%s' % track + 'label'] = qtw.QLabel(track, self)
             globals()['string%s' % track + 'label'].setGeometry(self.initXLabel, self.initYBoxLabel, self.sizeTextX, 30)
             self.todosWidgets.append(globals()['string%s' % track])
-
             self.initYBox += 80
             self.initYBoxLabel += 80
 
@@ -286,7 +305,14 @@ class Main(QMainWindow, QWidget):
     def showModalWindow(self):
         text, ok = QInputDialog.getText(self, 'Añadir Instrumento', 'Escribe el nombre de tu instrumento:')
         if ok:
-            self.createNewBox(text)
+            if text in self.validNames:
+                self.createNewBox(text)
+                dialog = QMessageBox()
+                dialog.setWindowTitle("Error")
+                dialog.setText("Nombre no valido")
+                dialog.setIcon(QMessageBox.Critical)
+                dialog.exec_()
+                print("Not valid name")
 
     def checkDimensions(self):
 
