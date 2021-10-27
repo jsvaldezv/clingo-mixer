@@ -307,12 +307,12 @@ class Main(QMainWindow, QWidget):
         if ok:
             if text in self.validNames:
                 self.createNewBox(text)
+            else:
                 dialog = QMessageBox()
                 dialog.setWindowTitle("Error")
                 dialog.setText("Nombre no valido")
                 dialog.setIcon(QMessageBox.Critical)
                 dialog.exec_()
-                print("Not valid name")
 
     def checkDimensions(self):
 
