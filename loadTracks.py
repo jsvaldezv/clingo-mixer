@@ -49,12 +49,14 @@ def loadTracks(inInstrumentos):
     return tracks
 
 def checkStems(inPaths):
+    print("---------")
     print("Checking stems...")
     mayor = 0
     for path in inPaths:
         file = SoundFile(path[1])
         if len(file) > mayor:
             mayor = len(file)
+    print("---------")
     return mayor
 
 def loadTrackswithPath(inPaths, inLen):

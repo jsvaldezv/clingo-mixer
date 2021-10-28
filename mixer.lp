@@ -19,6 +19,11 @@
 %track(arp, on).
 %track(drums, on).
 
+%track(lead, on).
+%track(fx, on).
+%track(subbass, on).
+%track(violin, on).
+
 instrument(I) :- track(I, on).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PANEO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -29,6 +34,8 @@ withPan(vox, 0) :- instrument(vox).
 withPan(over, 0) :- instrument(over).
 withPan(drums, 0) :- instrument(drums).
 withPan(piano, 0) :- instrument(piano).
+withPan(subbass, 0) :- instrument(subbass).
+
 
 %% TOMS %%
 1 { panOne(-5) ; panOne(5) ; panOne(8) } 1 :- instrument(tomOne).
@@ -100,6 +107,19 @@ withPan(strings, P)  :- panStrings(P).
 1 { panArp(-9) ; panArp(9) ; panArp(-7) } 1 :- instrument(arp).
 withPan(arp, P)  :- panArp(P).
 
+
+%% LEAD %%
+1 { panLead(-8) ; panLead(8) ; panLead(-6) } 1 :- instrument(lead).
+withPan(lead, P)  :- panLead(P).
+
+%% FX %%
+1 { panFx(-7) ; panFx(7) ; panFx(-4) } 1 :- instrument(fx).
+withPan(fx, P)  :- panFx(P).
+
+%% VIOLIN %%
+1 { panViolin(-4) ; panViolin(3) ; panViolin(4) } 1 :- instrument(violin).
+withPan(violin, P)  :- panViolin(P).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  BALANCE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% KICK
 withVol(kick, 9) :- instrument(kick).
@@ -159,7 +179,7 @@ volAcouguit(5;7).
 withVol(acouguit, V) : volAcouguit(V) :- instrument(acouguit).
 
 % SYNTH
-volSynth(5;8).
+volSynth(3;4).
 withVol(synth, V) : volSynth(V) :- instrument(synth).
 
 % STRINGS
@@ -174,10 +194,24 @@ withVol(arp, V) : volArp(V) :- instrument(arp).
 volDrums(7;6).
 withVol(drums, V) : volDrums(V) :- instrument(drums).
 
+% LEAD
+volLead(3;4).
+withVol(lead, V) : volDrums(V) :- instrument(lead).
+
+% FX
+volFx(4;5).
+withVol(fx, V) : volFx(V) :- instrument(fx).
+
+% SUBBASS
+volSubbass(3;5).
+withVol(subbass, V) : volSubbass(V) :- instrument(subbass).
+
+% VIOLIN
+volViolin(4;3).
+withVol(violin, V) : volViolin(V) :- instrument(violin).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%    EFFECTS    %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%     effect(instrument, reverb).
-%%%     effect(instrument, delay).
-%%%     effect(instrument, both).
 %%%     effect(instrument, off).
 
 %% KICK
@@ -232,8 +266,49 @@ withRev(piano, D) : revPiano(D) :- instrument(piano).
 revAcouguit(1;3).
 withRev(acouguit, D) : revAcouguit(D) :- instrument(acouguit).
 
-revSynth(4).
+% CLAP
+revClap(3;5).
+withRev(clap, D) : revClap(D) :- instrument(clap).
+
+% CYMBAL
+revCymbal(2;4).
+withRev(cymbal, D) : revCymbal(D) :- instrument(cymbal).
+
+% SHAKER
+revShaker(2;3).
+withRev(shaker, D) : revShaker(D) :- instrument(shaker).
+
+% DRUMS
+revDrums(2;4).
+withRev(drums, D) : revDrums(D) :- instrument(drums).
+
+% STRINGS
+revStrings(1;3).
+withRev(strings, D) : revStrings(D) :- instrument(strings).
+
+% SYNTH
+revSynth(2;5).
 withRev(synth, D) : revSynth(D) :- instrument(synth).
+
+% ARP
+revArp(3;5).
+withRev(arp, D) : revArp(D) :- instrument(arp).
+
+% LEAD
+revLead(2;5).
+withRev(lead, D) : revLead(D) :- instrument(lead).
+
+% FX
+revFx(1;3).
+withRev(fx, D) : revFx(D) :- instrument(fx).
+
+% SUBBASS
+revSubbass(2;4).
+withRev(subbass, D) : revSubbass(D) :- instrument(subbass).
+
+% VIOLIN
+revViolin(2;4).
+withRev(violin, D) : revViolin(D) :- instrument(violin).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  MIX  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 mix(I, P, V, R) : withRev(I, R) :- withVol(I, V), withPan(I, P).

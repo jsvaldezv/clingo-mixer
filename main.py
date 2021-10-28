@@ -86,7 +86,7 @@ class Main(QMainWindow, QWidget):
         self.models = []
         self.validNames = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "guitOne",
                            "guitTwo", "piano", "vox", "clap", "cymbal", "shaker", "acouguit", "synth", "strings",
-                           "arp", "drums"]
+                           "arp", "drums", "lead", "subbass", "fx", "violin"]
         self.tracks = ["kick", "snare", "hihat", "tomOne", "tomTwo", "tomThree", "over", "bass", "piano", "vox"]
 
         self.initXBox = 240
@@ -172,7 +172,7 @@ class Main(QMainWindow, QWidget):
     def solveWithClingo(self):
         # **** CONFIGURAR Y CARGAR CLINGO ***** #
         control = clingo.Control(clingo_args)
-        print(self.sp.value())
+        #print(self.sp.value())
         control.configuration.solve.models = self.sp.value()
         control.load("mixer.lp")
         models = []
