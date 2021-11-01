@@ -284,9 +284,10 @@ class Main(QMainWindow, QWidget):
                     # ***************** OPERACIONES CON TRACKS **************** #
                     tracksModified[numeroPista][1][:, 0] *= left_factor * vol
                     tracksModified[numeroPista][1][:, 1] *= right_factor * vol
-
+                    reverbSound[:,0] *= left_factor * vol * 0.5
+                    reverbSound[:, 1] *= right_factor * vol * 0.5
                     # *********************** SUMAR TRACKS ******************** #
-                    # trackFinal += tracksModified[numeroPista][1]
+                    #trackFinal += tracksModified[numeroPista][1]
                     trackFinal += tracksModified[numeroPista][1] + reverbSound
 
                     cont += 1
