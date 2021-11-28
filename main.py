@@ -1,8 +1,8 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetItem, QPushButton, QWidget
-from PyQt5.QtWidgets import QLabel, QVBoxLayout, QInputDialog, QSpinBox, QMessageBox
+from PyQt5.QtWidgets import QLabel, QInputDialog, QSpinBox, QMessageBox, QTextEdit
 import PyQt5.QtWidgets as qtw
-from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtCore import Qt
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import clingo, random, math, loadTracks, copy
@@ -147,7 +147,9 @@ class Main(QMainWindow, QWidget):
             self.initYBox += 80
             self.initYBoxLabel += 80
 
-        #chart = Canvas(self)
+        # TEXT BUTTON #
+        self.textEdit = QTextEdit(self)
+        self.textEdit.setGeometry(930, 15, 250, 575)
 
     def clear(self):
         for track in self.tracks:
@@ -170,6 +172,9 @@ class Main(QMainWindow, QWidget):
         self.solveWithClingo()
 
     def solveWithClingo(self):
+        self.textEdit.clear()
+        self.printText("Starting...")
+        self.printText("-------------")
         # **** CONFIGURAR Y CARGAR CLINGO ***** #
         control = clingo.Control(clingo_args)
         #print(self.sp.value())
@@ -184,21 +189,26 @@ class Main(QMainWindow, QWidget):
 
         # **** GROUNDING ***** #
         print("Grounding...")
+        self.printText("Grounding...")
         control.ground([("base", [])])
         print("------")
+        self.printText("-------------")
 
         # **** SOLVE ***** #
         print("Solving...")
+        self.printText("Solving...")
         with control.solve(yield_=True) as solve_handle:
             for model in solve_handle:
                 models.append(model.symbols(shown=True))
         print("------")
+        self.printText("-------------")
 
         cont = 0
         resultados = []
         for model in models:
             resp = []
             print("MIX ", cont + 1)
+            self.printText("MIX " + str(cont + 1))
             for atom in model:
                 instrumento = str(atom.arguments[0])
                 pan = int(str(atom.arguments[1]))
@@ -213,10 +223,13 @@ class Main(QMainWindow, QWidget):
 
                 resp.append(resul)
 
-                print("Aplicar", pan, "de paneo a", instrumento, "con un volumen de", vol, "y reverb de", rev * 10)
+                print(" - Aplicar", pan, "de paneo a", instrumento, "con un volumen de", vol, "y reverb de", rev * 10)
+                self.printText(" - Aplicar " + str(pan) + " de paneo a " + str(instrumento) + " con un volumen de " +
+                               str(vol) + " y reverb de " + str(rev * 10))
 
             resultados.append(resp)
             cont += 1
+            self.printText("-------------")
 
         # *** ORDENAR RESULTADOS Y AUDIOS **** #
         self.loadedTracks = sorted(self.loadedTracks)
@@ -228,6 +241,7 @@ class Main(QMainWindow, QWidget):
         # *** MIXING *** #
         print("---------")
         print("Mixing...")
+        self.printText("Rendering...")
         for answer in range(self.sp.value()):
             # ******** CHECAR SI HAY O NO MÁS ANSWERS DE LAS REQUERIDAS ******** #
             if (answer + 1) <= len(resultados):
@@ -284,7 +298,7 @@ class Main(QMainWindow, QWidget):
                     # ***************** OPERACIONES CON TRACKS **************** #
                     tracksModified[numeroPista][1][:, 0] *= left_factor * vol
                     tracksModified[numeroPista][1][:, 1] *= right_factor * vol
-                    reverbSound[:,0] *= left_factor * vol * 0.5
+                    reverbSound[:, 0] *= left_factor * vol * 0.5
                     reverbSound[:, 1] *= right_factor * vol * 0.5
                     # *********************** SUMAR TRACKS ******************** #
                     #trackFinal += tracksModified[numeroPista][1]
@@ -295,13 +309,17 @@ class Main(QMainWindow, QWidget):
                 # ************************** RENDER MIX **************************** #
                 sf.write('mixes/mix_' + str(answer + 1) + '.wav', trackFinal, 44100, 'PCM_24')
                 print("Mezcla", answer + 1, "creada")
+                self.printText("Mezcla " + str(answer + 1) + " creada")
             else:
                 print("Ya no hay más mezclas disponibles")
+                self.printText("Ya no hay más mezclas disponibles")
                 break
 
         # *** END *** #
         print("-------")
+        self.printText("-------------")
         print("¡Ya puedes escuchar tus mezclas!")
+        self.printText("¡Ya puedes escuchar tus mezclas!")
 
     def showModalWindow(self):
         text, ok = QInputDialog.getText(self, 'Añadir Instrumento', 'Escribe el nombre de tu instrumento:')
@@ -353,6 +371,11 @@ class Main(QMainWindow, QWidget):
         self.initYBoxLabel += 80
 
         print(inName, "añadido")
+
+    def printText(self, inText):
+        cursor = self.textEdit.textCursor()
+        cursor.atEnd()
+        cursor.insertText(inText + "\n")
 
 
 app = QApplication(sys.argv)
