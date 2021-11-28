@@ -1,6 +1,6 @@
 ## Smart Mixer
 
-### By: Jesús Salvador Valdez Vázquez
+### By: Jesús Salvador Valdez Vázquez and David Guevara
 
 <img width="1196" alt="mixer" src="https://user-images.githubusercontent.com/47612276/143787729-7ab3a973-5395-403b-9b35-df0b662e2c71.png">
 
@@ -12,8 +12,8 @@ one audio all together, you can decide how many mixes the program will give you.
 Note: The mixer was programed and tested in pycharm.
 
 1. Pycharm: You can download Pycharm from official website https://www.jetbrains.com/pycharm/promo/?source=google&medium=cpc&campaign=14127625370&gclid=Cj0KCQiA7oyNBhDiARIsADtGRZZBxy08Ea0VEnvRkC6ZV4FhQ7JZGJgwMfBwWvUusxN8vcqAQQMLU8waAmYkEALw_wcB
-2. You can also run the code with spider or console itself.
-3. Install all dependencies (I recommend install all of them inside pycharm)
+2. You should be able to run the code with spider, jupyter or console itself as well.
+3. Install all dependencies (I recommend install all of them inside pycharm).
 * Clingo: You can follow Clingo instructions from https://github.com/potassco/clingo repository
   - Python formula: ```pip install clingo``` 
   - Homebrew formula: ```brew install clingo```
