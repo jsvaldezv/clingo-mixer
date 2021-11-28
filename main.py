@@ -3,8 +3,6 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QListWidget, QListWidgetI
 from PyQt5.QtWidgets import QLabel, QInputDialog, QSpinBox, QMessageBox, QTextEdit
 import PyQt5.QtWidgets as qtw
 from PyQt5.QtCore import Qt
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import clingo, random, math, loadTracks, copy
 import soundfile as sf
 from pysndfx import AudioEffectsChain
@@ -17,24 +15,6 @@ clingo_args = [ "--warn=none",
                 "--seed=%s"%random.randint(0,32767),
                 "--restart-on-model",
                 "--enum-mode=record"]
-
-
-class Canvas(FigureCanvas):
-    def __init__(self, parent):
-        fig, self.ax = plt.subplots(figsize=(5, 4), dpi = 200)
-        super().__init__(fig)
-        self.setParent(parent)
-
-        t = np.arange(0.0, 2.0, 0.01)
-        s = 1 + np.sin(2 * np.pi * t)
-
-        self.ax.plot(t, s)
-
-        self.ax.set(xlabel='time (s)', ylabel="mV", title="YES")
-        self.ax.grid()
-
-        fig.savefig("test.png")
-        plt.show()
 
 
 class ListboxWidget(QListWidget):
