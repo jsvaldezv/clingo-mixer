@@ -1,0 +1,5 @@
+clingo==5.*
+PyQt5==5.*
+soundfile==0.*
+pysndfx==0.*
+black==23.*
