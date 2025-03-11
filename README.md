@@ -1,9 +1,8 @@
-## Smart Mixer
+## Clingo Mixer
 
 <img width="1196" alt="mixer" src="https://user-images.githubusercontent.com/47612276/143787729-7ab3a973-5395-403b-9b35-df0b662e2c71.png">
 
-Smart mixer with Python and Clingo where you can tell the A.I. which instruments to mix, the program modify volume, panning and reverb to the original audios and render just
-one audio all together, you can decide how many mixes the program will give you. The intelligence is based on Answer Set Programming using Clingo.
+Interactive mixer using Python and Clingo that allows you to instruct the solver on which instruments to mix. The program modifies volume, panning, and reverb of the original audio tracks, and renders them into a single audio file. You can choose how many mixes the program will generate. The solver leverages Answer Set Programming using Clingo.
 
 ## Local running
 
