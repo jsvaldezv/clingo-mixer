@@ -257,16 +257,7 @@ class Main(QMainWindow, QWidget):
                     "and reverb mix of",
                     rev * 10,
                 )
-                self.printText(
-                    " - Add",
-                    +str(pan)
-                    + "of pan to"
-                    + str(instrumento)
-                    + "with gain of"
-                    + str(vol)
-                    + "and reverb mix of"
-                    + str(rev * 10),
-                )
+                self.printText(f" - Add {str(pan)} of pan to {instrumento} with gain of {str(vol)} and reverb mix of {str(rev * 10)}")
 
             resultados.append(resp)
             cont += 1
