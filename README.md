@@ -1,8 +1,12 @@
 ## Clingo Mixer
 
-<img width="1196" alt="mixer" src="https://user-images.githubusercontent.com/47612276/143787729-7ab3a973-5395-403b-9b35-df0b662e2c71.png">
+<img width="1199" alt="Screenshot 2025-04-11 at 7 35 08 p m" src="https://github.com/user-attachments/assets/2a79137d-eab2-4396-9928-b1068adc748f" />
 
-Interactive mixer using Python and Clingo that allows you to instruct the solver on which instruments to mix. The program modifies volume, panning, and reverb of the original audio tracks, and renders them into a single audio file. You can choose how many mixes the program will generate. The solver leverages Answer Set Programming using Clingo.
+This project is an interactive mixer that uses Python and Clingo to generate multiple audio mixdowns based on user-defined instructions. You can specify which instruments to include, and the solver will apply automated adjustments to volume, panning, and reverb on each track.
+
+The system generates a selected number of unique mixes and exports them as rendered audio files. At its core, it uses Answer Set Programming (ASP) with Clingo to explore multiple mix configurations and find musically coherent results based on logical constraints.
+
+This tool is ideal for exploring creative mix variations and for automating part of the mixing process through intelligent rule-based programming.
 
 ## Local running
 
